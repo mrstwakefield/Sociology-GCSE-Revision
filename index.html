@@ -1140,30 +1140,11 @@ const RMGEN = {
   sample:rng=>{ const s=pickR(SCEN,rng), sp=pickR(SAMPLES,rng); return mk(`For a study into ${s.c}, a researcher ${sp.txt}.`,"Which sampling method was used?",sp.n,shuffleR(SAMPLES.filter(x=>x!==sp),rng).map(x=>x.n),`${sp.n}, because ${sp.why}.`,"rm"); },
   dtype:rng=>{ const s=pickR(SCEN,rng), dt=pickR(DTYPES,rng); return mk(`In a study into ${s.c}, the researcher ${dt.txt}.`,"What type of data is this?",dt.n,DTYPES.filter(x=>x!==dt).map(x=>x.n),`${dt.n}, because ${dt.why}.`,"rm"); },
   ethics:rng=>{ const s=pickR(SCEN,rng), e=pickR(ETHICS,rng); return mk(`In a study into ${s.c}, the researcher ${e.txt}.`,"Which ethical issue has been broken?",e.n,shuffleR(ETHICS.filter(x=>x!==e),rng).map(x=>x.n),`${e.n}.`,"rm"); },
-  corr:rng=>{ const [x,y]=pickR(CORR,rng), k=Math.floor(rng()*3);
-    const sc=[`A sociologist found that as ${x} increased, ${y} also increased.`,`A sociologist found that as ${x} increased, ${y} decreased.`,`A sociologist found no pattern between ${x} and ${y}.`][k];
-    const n=["Positive correlation","Negative correlation","No correlation"][k];
-    return mk(sc,"What type of relationship (correlation) is this?",n,["Positive correlation","Negative correlation","No correlation","Proof that one causes the other"],`${n}. Remember: a correlation does not prove cause and effect.`,"maths"); },
-  mean:rng=>{ const s=pickR(SCEN,rng), n=5+Math.floor(rng()*2), xs=ints(n,s.lo,s.hi,rng), sum=xs.reduce((a,b)=>a+b,0), m=sum/n, so=xs.slice().sort((a,b)=>a-b), med=n%2?so[(n-1)/2]:(so[n/2-1]+so[n/2])/2;
-    return mk(`${intro(s)} Results for ${n} ${s.A} ${s.who} (${s.unit}) were: ${xs.join(", ")}.`,"Calculate the mean (to 1 decimal place if needed).",fmtN(m),[fmtN(med),fmtN(sum/(n-1)),String(sum),String(so[n-1]-so[0])],`${fmtN(m)} (${sum} ÷ ${n})`,"maths"); },
-  median:rng=>{ const s=pickR(SCEN,rng), xs=ints(7,s.lo,s.hi,rng), so=xs.slice().sort((a,b)=>a-b), med=so[3], m=xs.reduce((a,b)=>a+b,0)/7;
-    return mk(`${intro(s)} Results for seven ${s.B} ${s.who} (${s.unit}) were: ${xs.join(", ")}.`,"What is the median?",med,[xs[3],fmtN(m),so[6]-so[0],so[2]],`${med}. In order: ${so.join(", ")}. The middle value is ${med}.`,"maths"); },
-  mode:rng=>{ const s=pickR(SCEN,rng), base=distinctInts(5,s.lo,s.hi,rng), md=base[Math.floor(rng()*5)], xs=shuffleR(base.concat([md]),rng), m=xs.reduce((a,b)=>a+b,0)/6, so=xs.slice().sort((a,b)=>a-b);
-    return mk(`${intro(s)} Results for six ${s.A} ${s.who} (${s.unit}) were: ${xs.join(", ")}.`,"What is the mode?",md,[fmtN(m),so[5],(so[2]+so[3])/2,so[5]-so[0]],`${md}. It appears most often (twice).`,"maths"); },
-  range:rng=>{ const s=pickR(SCEN,rng), xs=distinctInts(6,s.lo,s.hi,rng), mx=Math.max(...xs), mn=Math.min(...xs);
-    return mk(`${intro(s)} Results for six ${s.B} ${s.who} (${s.unit}) were: ${xs.join(", ")}.`,"Calculate the range.",mx-mn,[mx-mn+1,mx,mn,fmtN(xs.reduce((a,b)=>a+b,0)/6)],`${mx-mn} (highest ${mx} − lowest ${mn})`,"maths"); },
-  pct:rng=>{ const s=pickR(SCEN,rng), N=pickR([20,25,40,50,80,200],rng); let k; do{ k=1+Math.floor(rng()*(N-1)); }while((k*100)%N || k*2===N); const p=k*100/N;
-    return mk(`In a study into ${s.c}, ${N} ${s.who} took part. ${k} of them were ${s.A}.`,"What percentage of the sample is this?",p+"%",[(100-p)+"%",k+"%",(Math.round(N/k*10)/10)+"%",(p+10)+"%",(p/10)+"%"],`${p}% (${k} ÷ ${N} × 100)`,"maths"); },
-  ratio:rng=>{ const s=pickR(SCEN,rng); let a,b,g; do{ a=2+Math.floor(rng()*28); b=2+Math.floor(rng()*28); g=gcd(a,b); }while(g===1 || a===b);
-    return mk(`In a study into ${s.c}, the sample had ${a} ${s.A} and ${b} ${s.B} ${s.who}.`,`What is the ratio of ${s.A} to ${s.B} in its simplest form?`,`${a/g}:${b/g}`,[`${b/g}:${a/g}`,`${a}:${b}`,`${a/g}:${(a+b)/g}`],`${a/g}:${b/g} (divide both by ${g})`,"maths"); },
-  compare:rng=>{ const s=pickR(SCEN,rng), a=s.lo+Math.round(rng()*(s.hi-s.lo)*10)/10, b=s.lo+Math.round(rng()*(s.hi-s.lo)*10)/10; if(Math.abs(a-b)<0.5) return RMGEN.compare(rng);
-    const hi=a>b?s.A:s.B, lo=a>b?s.B:s.A, d=fmtN(Math.abs(a-b));
-    return mk(`${intro(s)} The mean for ${s.A} ${s.who} was ${fmtN(a)} and the mean for ${s.B} ${s.who} was ${fmtN(b)} (${s.unit}).`,"Which statement about the results is correct?",`The ${hi} group had a higher mean, by ${d}`,[`The ${lo} group had a higher mean, by ${d}`,`The two groups had the same mean`,`The ${hi} group had a higher mean, by ${fmtN(a+b)}`],`The ${hi} group had a higher mean, by ${d} (${fmtN(Math.max(a,b))} − ${fmtN(Math.min(a,b))}).`,"maths"); },
 };
-const RM_W = {method:3,strength:2,weak:2,sample:3,dtype:2,ethics:2,corr:2,mean:3,median:2,mode:2,range:2,pct:3,ratio:1,compare:2};
+const RM_W = {method:3,strength:2,weak:2,sample:3,dtype:2,ethics:2};
 const RM_BAG = Object.entries(RM_W).flatMap(([k,w])=>Array(w).fill(k));
-const MATHS_KEYS = ["corr","mean","median","mode","range","pct","ratio","compare"];
-function genRM(rng=Math.random, kind){ const keys = kind==="maths" ? RM_BAG.filter(k=>MATHS_KEYS.includes(k)) : kind==="rm" ? RM_BAG.filter(k=>!MATHS_KEYS.includes(k)) : RM_BAG; return RMGEN[pickR(keys,rng)](rng); }
+const MATHS_KEYS = [];   // no data/maths questions on the sociology site
+function genRM(rng=Math.random){ return RMGEN[pickR(RM_BAG,rng)](rng); }
 
 /* add to the main question bank: exam skills (6001+) and a fixed set of generated RM questions (5001+) */
 EXAM.forEach(([q,opt,wrong,a],i)=>DATA.push({q, a, opt, wrong, t:"Exam skills", id:6001+i}));
@@ -1401,7 +1382,7 @@ function renderMathCard(){
   const ph = /correlation/i.test(d.opt) ? "e.g. positive" : /:/.test(d.opt) ? "e.g. 3:2" : /\//.test(d.opt) ? "e.g. 1/4" : /×/.test(d.opt) ? "e.g. 4.5 x 10^-3" : /%/.test(d.opt) ? "e.g. 35%" : "Type a number";
   $("#cardArea").innerHTML=`<div class="progressline"><i style="width:${pos/deck.length*100}%"></i></div>
     <div class="quiz-q gapcard ${gold?"golden":""}" style="--c:${t.c}">
-      <div class="tag">${gold?'<span class="goldtag">✨ Golden card · 5× XP</span>':"🧮 RM maths"} <span class="muted">Card ${pos+1} of ${deck.length}</span></div>
+      <div class="tag">${gold?'<span class="goldtag">✨ Golden card · 5× XP</span>':"🔬 Research methods"} <span class="muted">Card ${pos+1} of ${deck.length}</span></div>
       ${scHTML(d)}<div class="q has-sc">${esc(d.q)}</div>
       <label for="cgIn" class="muted" style="display:block;margin:4px 0 6px;font-size:15px">Type your answer</label>
       <input id="cgIn" class="search gapin" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="${ph}">
@@ -1889,7 +1870,6 @@ const BADGES = [
   ["exam10","🎓","Exam ready","Score 10/10 in Exam Skills",()=>G.st.exam>=10],
   ["examR","📝","Exam technique pro","Get 50 exam-skills questions right",()=>G.st.examR>=50],
   ["terms30","🔤","Wordsmith","Score a perfect 30 in Key Terms",()=>G.st.terms>=30],
-  ["maths25","🧮","Number cruncher","Get 25 data skills questions right",()=>G.st.maths>=25],
   ["review50","📅","Memory keeper","Review 50 cards when they're due",()=>G.st.reviews>=50],
   ["boss1","⚔️","Boss slayer","Defeat your first boss",()=>Object.values(G.bosses).some(b=>b.won)],
   ["flawless","👑","Flawless victory","Defeat a boss without losing a life",()=>Object.values(G.bosses).some(b=>b.flawless)],
@@ -2114,7 +2094,6 @@ const MODES = {
   exam:{icon:"🎓", name:"Exam Skills", c:"#9A6324", hot:"2× XP", desc:"Question types, AO1/AO2/AO3, what gets full marks, and applying research methods to unseen scenarios. 10 questions."},
   terms:{icon:"🔤", name:"Key Terms", c:"#2596B0", desc:"Fill the gap. Read the definition and type the key term. 3 points each, and hints cost a point."},
   fix:{icon:"🩹", name:"Fix my mistakes", c:"#0F766E", desc:"Everything you've got wrong anywhere on the site. Get each one right twice in a row to clear it. Up to 10 at a time."},
-  maths:{icon:"🧮", name:"Data Skills", c:"#4A58B8", desc:"Brand-new research scenarios every time: mean, median, mode, range, percentages, ratios and reading results. 10 questions."},
   blitz:{icon:"⚡", name:"Blitz", c:"#E0533D", desc:"60 seconds. Answer as many as you can. Wrong answers cost 3 seconds. Includes exam-skills bonus questions."},
   boss:{icon:"🐉", name:"Boss Battles", c:"#B91C1C", desc:"Face the boss of each topic. 15 HP, 3 lives, 15 seconds a question. Combos of 5+ deal double damage."},
   surv:{icon:"❤️", name:"Survival", c:"#7B5BE0", desc:"Three lives and 12 seconds per question. How far can you get? Includes exam-skills bonus questions."},
@@ -2125,7 +2104,7 @@ const MODES = {
   match:{icon:"🔗", name:"Study Matcher", c:"#9A6324", hot:"2× XP", desc:"Match each study to its aim, procedure, finding or conclusion, against the clock. Pick a round type or play them all mixed."},
   order:{icon:"🔢", name:"Put it in Order", c:"#9A6324", hot:"2× XP", desc:"Tap the steps in the right order: research design, divorce law, labelling, Marx, PEEL and more. 6 rounds."},
 };
-const GOTD_POOL=["exam","terms","maths","blitz","surv","flaw","order","match","swipe","which","boss"];
+const GOTD_POOL=["exam","terms","blitz","surv","flaw","order","match","swipe","which","boss"];
 const GOTD_ORDER = shuffleR(GOTD_POOL, rngFrom("gotd-order-v1"));
 function gotd(){ const n=dayNum(today()); return GOTD_ORDER[((n%GOTD_ORDER.length)+GOTD_ORDER.length)%GOTD_ORDER.length]; }
 const gotdMult = () => (typeof arc!=="undefined" && arc.mode===gotd()) ? 2 : 1;
@@ -3067,7 +3046,6 @@ function renderTrophies(){
       <div class="tile"><b>${G.st.surv}</b><span>Survival best</span></div>
       <div class="tile"><b>${G.st.exam}/10</b><span>Exam Skills best</span></div>
       <div class="tile"><b>${G.st.terms}/30</b><span>Key Terms best</span></div>
-      <div class="tile"><b>${G.st.mathsBest}/10</b><span>RM Maths best</span></div>
       <div class="tile"><b>${Object.values(G.bosses).filter(b=>b.won).length}/${Object.keys(BOSSES).length}</b><span>Bosses defeated</span></div>
       <div class="tile"><b>${G.st.flawBest||0}/16</b><span>Spot the Flaw best</span></div>
       <div class="tile"><b>${G.st.orderBest||0}/18</b><span>Put it in Order best</span></div>
