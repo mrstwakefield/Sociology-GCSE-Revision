@@ -915,10 +915,14 @@ mark.hit{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--i
 :root[data-skin="greens"]{--good:#36760F;--warn:#A24B18;--muted:#566A44}
 :root[data-skin="pavlov"]{--good:#845B0E;--warn:#A24B18;--muted:#776241}
 :root[data-skin="fool"]{--good:#187651;--muted:#74607E}
+.hublink{display:inline-flex;align-items:center;gap:4px;margin:0 0 12px;padding:6px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--ink);font:700 14px/1.2 var(--body);text-decoration:none}
+.hublink:hover{background:var(--soft)}
+.hublink:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <a class="hublink" href="https://arodker.github.io/history-revision/">← Revision hub</a>
   <div class="demobar" id="demobar" hidden></div>
   <header class="top">
     <h1><span class="h1t">The Fount of Knowledge and Wisdom</span><span>GCSE sociology revision, <b id="totalQ"></b> questions</span></h1>
